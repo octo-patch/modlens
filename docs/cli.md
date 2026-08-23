@@ -67,7 +67,7 @@ Output is a fixed JSON shape:
 | `--extra-body <json>` | JSON merged into the API request body, e.g. `'{"thinking":{"type":"disabled"}}'` | the provider's `extraBody` from the config |
 
 `--extra-body` is how vendor-specific knobs get through, turning thinking off
-being the common one. It applies to the three API providers and replaces the
+being the common one. It applies to the four API providers and replaces the
 configured `extraBody` for that run. Per-vendor spellings and the fields it
 refuses to touch are in [Configuration](../skills/modlens/references/configure.md).
 
@@ -81,6 +81,7 @@ The default `-m` model depends on the provider:
 | `claude-cli` | `haiku` |
 | `kimi-cli` | whatever kimi is configured with |
 | `openai` | none, `-m` is required |
+| `minimax` | `MiniMax-M3` |
 
 `modlens recover-paste`:
 
@@ -93,7 +94,7 @@ The default `-m` model depends on the provider:
 | `--harness <name>` | Force storage scope: `claude-code`, `pi`, `opencode`, `none` | auto-detect |
 | `--cwd <path>` | Project directory the image was pasted in | current directory |
 
-Six providers: `antigravity-cli` (no key), `gemini-api` (fastest free route), `openai` (any OpenAI-compatible multimodal endpoint), `anthropic`, `claude-cli` (uses your existing Claude subscription), and `kimi-cli` (uses your existing Kimi Code subscription, and runs only when named, never as a failover peer). Without `-p`, a run tries every provider that is set up, inline API providers first (5-10s), then the agents; the first good result wins and `meta.attempts` records the rest. Harnesses granted via `reuse.<harness>` contribute reused engines to the same regions (pi credentials inline, agent CLIs behind), with no priority over the user's own; details and the `guards` deny/allow lists are in [Configuration](../skills/modlens/references/configure.md).
+Seven providers: `antigravity-cli` (no key), `gemini-api` (fastest free route), `openai` (any OpenAI-compatible multimodal endpoint), `minimax` (MiniMax's OpenAI-compatible vision endpoint), `anthropic`, `claude-cli` (uses your existing Claude subscription), and `kimi-cli` (uses your existing Kimi Code subscription, and runs only when named, never as a failover peer). Without `-p`, a run tries every provider that is set up, inline API providers first (5-10s), then the agents; the first good result wins and `meta.attempts` records the rest. Harnesses granted via `reuse.<harness>` contribute reused engines to the same regions (pi credentials inline, agent CLIs behind), with no priority over the user's own; details and the `guards` deny/allow lists are in [Configuration](../skills/modlens/references/configure.md).
 
 Other subcommands:
 
@@ -101,4 +102,3 @@ Other subcommands:
 - `modlens config <init|set|show>`: `set` with the value omitted on an `apiKey` field prompts for it with the echo hidden, so the key never enters argv, shell history, or the conversation with an agent driving the terminal. It also accepts one piped line (`pbpaste | modlens config set openai.apiKey`), which keeps the key out of argv, though whatever produced that pipe is still your own command to keep out of history. Keys are `provider`, `proxy` (HTTP/HTTPS proxy for the API providers, `HTTPS_PROXY`/`HTTP_PROXY` also honored), `cooldown` (`on` or `off`, on by default), `reuse.<claude|codex|opencode|pi|grok>`, `guards.<denyModels|allowModels|denyWhenUnknown>`, and `<provider>.<apiKey|baseUrl|model|proxy|extraBody>`, plus `openai.structuredOutput` (that route only). `apiKey` accepts a comma-separated list and rotates after authentication, rate-limit, or quota failures.
 - `modlens state clear`: forget every provider cooldown in `~/.modlens/state.json`, so all providers are tried at full priority again.
 - `modlens doctor`: Node and node:sqlite, provider readiness (including API key counts), the failover chains for this machine, the cooldown switch and any cooling keys, the detected harness, the guard's rules with a live verdict, and the Reuse section with per-harness grant decisions and discovered vision. Spends no quota; `--json` for a machine-readable report.
-

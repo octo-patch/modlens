@@ -20,6 +20,11 @@ import type {
 
 type OpenaiSettings = BuildProviderInvocationOptions['settings'];
 
+type OpenaiCompatOptions = BuildProviderInvocationOptions & {
+    /** Canonical provider name used in diagnostics and protected fields. */
+    providerName?: string;
+};
+
 /**
  * Whether the request actually carried the schema modlens derives.
  * `structuredOutput` asks for it, and a `response_format` the caller put in
@@ -37,12 +42,15 @@ function derivedSchemaSent(settings: OpenaiSettings): boolean {
  * knob applies is a property of the request that went out, not of the way the
  * output disappointed, so both failure branches ask this one question.
  */
-function requestShapeAdvice(settings: OpenaiSettings): string {
+function requestShapeAdvice(settings: OpenaiSettings, providerName = 'openai'): string {
     if (settings?.extraBody?.response_format !== undefined) {
         return 'The response_format in your extraBody replaces the schema modlens derives, so yours decides the shape here. Check it against the contract, or drop it to hand enforcement back to modlens.';
     }
     if (!derivedSchemaSent(settings)) {
-        return 'The gateway was never asked to enforce the shape, so this is the model free-handing it. Ask the gateway instead: modlens config set openai.structuredOutput true.';
+        if (providerName !== 'openai') {
+            return `The ${providerName} gateway was not asked to enforce the shape. Check its official schema-enforcement options, or retry with the prompt contract enabled.`;
+        }
+        return `The gateway was never asked to enforce the shape, so this is the model free-handing it. Ask the gateway instead: modlens config set ${providerName}.structuredOutput true.`;
     }
     return 'The gateway was asked to enforce the shape and answered with this anyway. Retry, or switch to gemini-api / anthropic for enforced schemas.';
 }
@@ -73,22 +81,24 @@ function stringOrAbsent(value: unknown): string | undefined {
 function unusableOutputAdvice(
     finishReason: string | undefined,
     settings: OpenaiSettings,
+    providerName: string,
     quoteReason: (reason: string) => string,
     whenFinished: string,
 ): string {
     if (finishReason === 'length') {
-        return 'The answer was cut off (finish_reason=length), so this is a length limit rather than a shape problem. Raise it, e.g. modlens config set openai.extraBody \'{"max_tokens":4096}\'.';
+        return `The answer was cut off (finish_reason=length), so this is a length limit rather than a shape problem. Raise it, e.g. modlens config set ${providerName}.extraBody '{"max_tokens":4096}'.`;
     }
     if (finishReason !== undefined && finishReason !== 'stop') {
         return `The gateway ended the answer with finish_reason=${quoteReason(finishReason)}, so it may be incomplete for a reason of its own. Check what that reason means for this endpoint before changing the request.`;
     }
-    return `${whenFinished} ${requestShapeAdvice(settings)}`;
+    return `${whenFinished} ${requestShapeAdvice(settings, providerName)}`;
 }
 
 export async function executeOpenaiCompat(
-    options: BuildProviderInvocationOptions,
+    options: OpenaiCompatOptions,
 ): Promise<ProviderParsedOutput> {
-    assertNoRetiredEndpointBinding('openai', options.settings ?? {});
+    const providerName = options.providerName ?? 'openai';
+    assertNoRetiredEndpointBinding(providerName, options.settings ?? {});
     const apiKeys = splitApiKeys(options.settings?.apiKey);
     const apiKey = apiKeys[0];
     const apiKeySecrets = [...new Set([...apiKeys, ...(options.apiKeySecrets ?? [])])];
@@ -100,9 +110,11 @@ export async function executeOpenaiCompat(
     const model = options.model || options.settings?.model;
 
     if (!apiKey || !baseUrl || !model) {
-        throw new Error(
-            'openai provider needs baseUrl, apiKey, and model: modlens config set openai.baseUrl <url>, modlens config set openai.apiKey (a hidden prompt), modlens config set openai.model <name>. There is no default endpoint (official OpenAI is https://api.openai.com/v1). OPENAI_BASE_URL and OPENAI_API_KEY still supply this provider on their own, but only while the config file names no openai entry, since 3.17.0 takes a provider whole from one source; no variable carries the model, so an environment-only setup passes -m <name>.',
-        );
+        const setupMessage =
+            providerName === 'openai'
+                ? 'openai provider needs baseUrl, apiKey, and model: modlens config set openai.baseUrl <url>, modlens config set openai.apiKey (a hidden prompt), modlens config set openai.model <name>. There is no default endpoint (official OpenAI is https://api.openai.com/v1). OPENAI_BASE_URL and OPENAI_API_KEY still supply this provider on their own, but only while the config file names no openai entry, since 3.17.0 takes a provider whole from one source; no variable carries the model, so an environment-only setup passes -m <name>.'
+                : `${providerName} provider needs an API key. Run: modlens config set ${providerName}.apiKey (a hidden prompt).`;
+        throw new Error(setupMessage);
     }
 
     const imageUrl =
@@ -152,7 +164,7 @@ ${JSON_TEMPLATE_INSTRUCTION}`;
                     },
                     options.settings?.extraBody,
                     ['model', 'messages', 'stream'],
-                    'openai',
+                    providerName,
                 ),
             ),
             signal: AbortSignal.timeout(options.timeoutMs),
@@ -200,6 +212,7 @@ ${JSON_TEMPLATE_INSTRUCTION}`;
         const advice = unusableOutputAdvice(
             stringOrAbsent(payload.choices?.[0]?.finish_reason),
             options.settings,
+            providerName,
             (reason) => quote(reason, (clipped) => truncate(clipped, 80)),
             'The answer ended normally but no complete JSON object could be read from it.',
         );
@@ -219,6 +232,7 @@ ${JSON_TEMPLATE_INSTRUCTION}`;
         const advice = unusableOutputAdvice(
             stringOrAbsent(payload.choices?.[0]?.finish_reason),
             options.settings,
+            providerName,
             (reason) => quote(reason, (clipped) => truncate(clipped, 80)),
             'The answer ended normally and parsed, but not into the contract.',
         );

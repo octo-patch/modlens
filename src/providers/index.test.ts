@@ -10,6 +10,7 @@ describe('resolveProvider', () => {
         expect(resolveProvider('claude').name).toBe('anthropic');
         expect(resolveProvider('claude-code').name).toBe('claude-cli');
         expect(resolveProvider('openai-compat').name).toBe('openai');
+        expect(resolveProvider('minimax').name).toBe('minimax');
     });
 
     it('rejects unknown providers listing the valid ones', () => {
@@ -22,6 +23,7 @@ describe('resolveProvider', () => {
             'antigravity-cli',
             'gemini-api',
             'openai',
+            'minimax',
             'anthropic',
             'claude-cli',
             'kimi-cli',

@@ -359,7 +359,7 @@ export async function analyzeImage(options: AnalyzeOptions): Promise<AnalyzeResu
     );
 }
 
-const INLINE_REGION = new Set(['gemini-api', 'openai', 'anthropic']);
+const INLINE_REGION = new Set(['gemini-api', 'openai', 'minimax', 'anthropic']);
 
 /**
  * Merge granted borrowed routes into the base chain by region: borrowed keys

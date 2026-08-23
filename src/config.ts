@@ -91,6 +91,7 @@ export const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 const ENV_BINDINGS: Record<string, Partial<Record<ProviderStringField, string>>> = {
     'gemini-api': { apiKey: 'GEMINI_API_KEY', baseUrl: 'GEMINI_BASE_URL' },
     openai: { apiKey: 'OPENAI_API_KEY', baseUrl: 'OPENAI_BASE_URL' },
+    minimax: { apiKey: 'MINIMAX_API_KEY', baseUrl: 'MINIMAX_BASE_URL' },
     anthropic: { apiKey: 'ANTHROPIC_API_KEY', baseUrl: 'ANTHROPIC_BASE_URL' },
 };
 

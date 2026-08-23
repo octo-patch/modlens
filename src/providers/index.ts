@@ -4,6 +4,7 @@ import { antigravityCliProvider } from './antigravity.ts';
 import { claudeCliProvider } from './claudeCli.ts';
 import { geminiApiProvider } from './geminiApi.ts';
 import { kimiCliProvider } from './kimiCli.ts';
+import { minimaxApiProvider } from './minimaxApi.ts';
 import { openaiCompatProvider } from './openaiCompat.ts';
 
 export interface ProviderInvocation {
@@ -80,6 +81,7 @@ const PROVIDERS: Record<string, VisionProvider> = {
     gemini: geminiApiProvider,
     openai: openaiCompatProvider,
     'openai-compat': openaiCompatProvider,
+    minimax: minimaxApiProvider,
     anthropic: anthropicApiProvider,
     claude: anthropicApiProvider,
     'claude-cli': claudeCliProvider,

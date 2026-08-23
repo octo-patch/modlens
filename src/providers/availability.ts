@@ -54,6 +54,12 @@ export const PROVIDER_DESCRIPTORS: ProviderDescriptor[] = [
         fix: 'modlens config set openai.baseUrl <url> / openai.apiKey (hidden prompt) / openai.model <name>',
     },
     {
+        name: 'minimax',
+        kind: 'api',
+        required: [{ field: 'apiKey' }],
+        fix: 'modlens config set minimax.apiKey (hidden prompt) / minimax.baseUrl <url> / minimax.model <name>  # defaults to MiniMax global API and MiniMax-M3',
+    },
+    {
         name: 'anthropic',
         kind: 'api',
         required: [{ field: 'apiKey' }],
@@ -136,6 +142,7 @@ export function providerAvailable(
 const LOCAL_FAILOVER_ORDER = [
     'gemini-api',
     'openai',
+    'minimax',
     'anthropic',
     'antigravity-cli',
     'claude-cli',
@@ -146,7 +153,13 @@ const LOCAL_FAILOVER_ORDER = [
 // from, so being installed is not agreement to spend it. Pinning it with
 // `-p kimi-cli` or `config set provider kimi-cli` is.
 const PIN_ONLY_PROVIDERS = ['kimi-cli'] as const;
-const REMOTE_FAILOVER_ORDER = ['gemini-api', 'openai', 'anthropic', 'antigravity-cli'] as const;
+const REMOTE_FAILOVER_ORDER = [
+    'gemini-api',
+    'openai',
+    'minimax',
+    'anthropic',
+    'antigravity-cli',
+] as const;
 
 /**
  * The providers a run should try, in order, filtered to what is actually set
