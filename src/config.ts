@@ -91,6 +91,7 @@ export const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 // source, mention nothing and the environment is, which keeps a container that
 // only exports variables working with both halves still matching.
 const ENV_BINDINGS: Record<string, Partial<Record<ProviderStringField, string>>> = {
+    minimax: { apiKey: 'MINIMAX_API_KEY', baseUrl: 'MINIMAX_BASE_URL' },
     'gemini-api': { apiKey: 'GEMINI_API_KEY', baseUrl: 'GEMINI_BASE_URL' },
     openai: { apiKey: 'OPENAI_API_KEY', baseUrl: 'OPENAI_BASE_URL' },
     anthropic: { apiKey: 'ANTHROPIC_API_KEY', baseUrl: 'ANTHROPIC_BASE_URL' },

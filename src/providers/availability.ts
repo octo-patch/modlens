@@ -54,6 +54,12 @@ export const PROVIDER_DESCRIPTORS: ProviderDescriptor[] = [
         fix: 'modlens config set openai.baseUrl <url> / openai.apiKey (hidden prompt) / openai.model <name>',
     },
     {
+        name: 'minimax',
+        kind: 'api',
+        required: [{ field: 'baseUrl' }, { field: 'apiKey' }, { field: 'model' }],
+        fix: 'modlens config set minimax.baseUrl https://api.minimax.io/v1 / minimax.apiKey (hidden prompt) / minimax.model MiniMax-M3',
+    },
+    {
         name: 'anthropic',
         kind: 'api',
         required: [{ field: 'apiKey' }],

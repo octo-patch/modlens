@@ -22,6 +22,7 @@ import { resolveSpawnPlan } from '../util/winExec.ts';
  * glm-5.3-flash added 2026-08-26.
  */
 const VISION_MODEL_PATTERNS = [
+    'minimax-m3*',
     'claude-*',
     'gpt-4o*',
     'gpt-4.1*',

@@ -80,6 +80,7 @@ const PROVIDERS: Record<string, VisionProvider> = {
     gemini: geminiApiProvider,
     openai: openaiCompatProvider,
     'openai-compat': openaiCompatProvider,
+    minimax: openaiCompatProvider,
     anthropic: anthropicApiProvider,
     claude: anthropicApiProvider,
     'claude-cli': claudeCliProvider,
