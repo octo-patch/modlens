@@ -64,6 +64,19 @@ describe('providerAvailable', () => {
         },
     );
 
+    it('uses the MiniMax built-in endpoint and model with only an API key', () => {
+        expect(
+            providerAvailable(
+                'minimax',
+                { providers: { minimax: { apiKey: 'k' } } },
+                { PATH: pathWith() },
+            ),
+        ).toBe(true);
+        expect(
+            providerAvailable('minimax', { providers: { minimax: {} } }, { PATH: pathWith() }),
+        ).toBe(false);
+    });
+
     it('requires every setting for openai, not just the key', () => {
         const env = { PATH: pathWith() };
         const partial = { providers: { openai: { apiKey: 'k', baseUrl: 'https://x' } } };
