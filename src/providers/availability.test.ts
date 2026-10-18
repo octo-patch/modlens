@@ -74,6 +74,18 @@ describe('providerAvailable', () => {
         expect(providerAvailable('openai', full, env)).toBe(true);
     });
 
+    it('uses the MiniMax default endpoint and model when configured by key', () => {
+        expect(
+            providerAvailable('minimax', {}, { PATH: pathWith(), MINIMAX_API_KEY: 'm' }),
+        ).toBe(true);
+        expect(
+            providerAvailable('minimax', { providers: { minimax: {} } }, {
+                PATH: pathWith(),
+                MINIMAX_API_KEY: 'm',
+            }),
+        ).toBe(false);
+    });
+
     it('reads a provider from whichever single source configures it (#42)', () => {
         // The environment configures a provider the file never mentions.
         expect(providerAvailable('gemini-api', {}, { PATH: pathWith(), GEMINI_API_KEY: 'g' })).toBe(
